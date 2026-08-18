@@ -32,19 +32,23 @@ JSON 结果返回模型
 
 ## 安装
 
-前置:Node.js ≥ 18,`python3` 在 PATH 中(>= 3.9)。
+前置:Node.js ≥ 18,`python3` 在 PATH 中(>= 3.9)。本包以 **bundle** 形式分发,声明 `dsh.bundle`,通过 `dsh plugin` 安装进 profile:
 
-1. 将本包放入 Harness 部署的 `node_modules/`(或 `npm install` 该包);
-2. 在宿主 `cordis.yml` 添加一行:
+```sh
+# 从 npm(推荐,预构建产物直接可用)
+npx @deepseek-ai/dsh plugin --profile web add dsh-tool-irmia-devkit
 
-```yaml
-- id: tool-irmia-devkit
-  name: dsh-tool-irmia-devkit
-  config:
-    pythonPath: python3
+# 从 GitHub(锁定版本)
+npx @deepseek-ai/dsh plugin --profile web add github:irmia2026/dsh-tool-irmia-devkit#v0.1.0
 ```
 
-3. 重启/热载后,工具注册到会话。
+安装后可先验证配置层再启动:
+
+```sh
+npx @deepseek-ai/dsh --profile web --dump-config   # 应出现 "# == dsh-tool-irmia-devkit" 层
+npx @deepseek-ai/dsh web
+```
+
 
 ## 配置
 

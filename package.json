@@ -11,9 +11,15 @@
   "files": [
     "index.js",
     "src",
-    "python"
+    "python",
+    "cordis.patch.yml"
   ],
-  "license": "MIT",
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "license": "AGPL-3.0",
   "peerDependencies": {
     "@deepseek-ai/dsh-tools": "^0.1.0",
     "@deepseek-ai/schemastery": "^3.0.0"
