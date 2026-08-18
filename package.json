@@ -1,7 +1,7 @@
 {
   "name": "dsh-tool-irmia-devkit",
   "version": "0.1.0",
-  "description": "Curated Irmia DevKit tools ported to the DeepSeek Harness: safe_edit / safe_rollback / safe_backups / multi_edit / http_get / http_post / code_index / code_explore / code_diff_impact / code_pack / code_status / file_remove / file_move / db_query.",
+  "description": "Curated Irmia DevKit tools ported to the DeepSeek Harness: safe_edit / safe_rollback / multi_edit / http_get / http_post / code_index / code_explore / code_diff_impact / code_pack / code_status / db_query.",
   "type": "module",
   "main": "index.js",
   "exports": {

@@ -224,6 +224,15 @@ def is_binary_file(path: str | Path, sample_size: int = 8192) -> tuple[bool, str
     return False, "unknown"
 
 
+# 系统目录黑名单(全插件共用;原定义于 file_remove.py,随 file_remove 移除迁入本模块)
+_FORBIDDEN_PREFIXES = [
+    "C:/Windows/System32", "C:/Windows/SysWOW64",
+    "C:/Program Files", "C:/Program Files (x86)",
+    "C:/Users/All Users",
+    "/bin", "/boot", "/dev", "/etc", "/lib", "/proc", "/root", "/sbin", "/sys", "/usr", "/var",
+]
+
+
 def _check_path_safety(path: str | Path, *, read: bool = True) -> dict | None:
     """统一路径安全校验：拒绝 .. 穿越和系统目录访问。"""
     raw = str(path).replace("\\", "/")
@@ -232,7 +241,6 @@ def _check_path_safety(path: str | Path, *, read: bool = True) -> dict | None:
 
     p = Path(path).resolve()
     path_str = str(p).replace("\\", "/")
-    from .file_remove import _FORBIDDEN_PREFIXES
 
     for forbidden in _FORBIDDEN_PREFIXES:
         forbidden_norm = forbidden.replace("\\", "/")

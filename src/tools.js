@@ -144,27 +144,7 @@ export const toolDefinitions = [
     output: jsonOutput,
   },
 
-  // ── 文件删除/移动 ───────────────────────────────────────────
-  {
-    name: "file_remove",
-    description: "安全删除文件或目录:拒绝系统目录与路径穿越;目录删除需 confirm=true 二次确认;目录超过 max_items 个文件时返回提案不执行。",
-    parameters: {
-      path: { type: "string", required: true, description: "文件或目录路径" },
-      confirm: { type: "boolean", description: "目录删除确认,默认 false" },
-      max_items: { type: "integer", description: "目录文件数上限,默认 50" },
-    },
-    output: jsonOutput,
-  },
-  {
-    name: "file_move",
-    description: "移动文件/目录到目标目录(自动创建)。同分区 os.rename 原子移动,跨分区自动用 robocopy/rsync/逐文件降级。",
-    parameters: {
-      sources: { type: "array", required: true, items: { type: "string" }, description: "源路径列表" },
-      dest: { type: "string", required: true, description: "目标目录" },
-      overwrite: { type: "boolean", description: "覆盖同名文件,默认 false" },
-    },
-    output: jsonOutput,
-  },
+  // ── 只读数据库 ─────────────────────────────────────────────
   {
     name: "db_query",
     description: "只读查询 SQLite 数据库:仅允许 SELECT/PRAGMA(mode=ro 引擎层只读双保险),参数化查询防注入。不支持写操作。",

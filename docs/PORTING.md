@@ -7,7 +7,7 @@
 
 ## 一、保留清单(原样移植,不改造)
 
-### 核心 5 模块(真实缺口,Harness 没有)
+### 核心 4 模块(真实缺口,Harness 没有)
 
 | 模块 | 注册工具数 | 工具 | 保留理由(有用且好用) |
 |---|---|---|---|
@@ -15,9 +15,9 @@
 | `multi_edit.py` | 1 | multi_edit | 跨文件原子批量编辑,Harness 无 |
 | `http_get.py` + `_http_utils.py` | 2 | http_get / http_post | SSRF 防护的取网能力,Harness 无(web_fetch 未启用) |
 | `codegraph.py` | 5 | code_index / code_explore / code_diff_impact / code_pack / code_status | 大仓库符号语义查询,Harness 只有 grep |
-| `file_remove.py` | 2 | file_remove / file_move | Harness 无删除工具 |
 
-> 注:`safe_read.py` 已从保留清单移除——原生 read 已支持 offset/limit 翻页与续读 footer,safe_read 的增量(编码检测/hex/skeleton)均可由一条 bash 命令覆盖,保留会造成模型在 read/safe_read 间选择的负担。
+> 注 1:`safe_read.py` 已从保留清单移除——原生 read 已支持 offset/limit 翻页与续读 footer,safe_read 的增量(编码检测/hex/skeleton)均可由一条 bash 命令覆盖,保留会造成模型在 read/safe_read 间选择的负担。
+> 注 2:`file_remove.py` 已从保留清单移除——file_move 是 `mv` 一条命令可替代;file_remove 的路径沙箱价值被平台层(安全编辑链路径校验保留,`_FORBIDDEN_PREFIXES` 黑名单迁入 `_file_utils.py`)覆盖,删除操作交还 bash `rm`。
 
 ### 可选 1 模块(要不要由你定)
 
@@ -69,7 +69,7 @@
 | 批 1 | safe_edit 家族 + multi_edit(+随迁 _file_utils/_helpers/syntax_check/file_patch) | 中(依赖链长,但纯 Python 搬运) |
 | 批 2 | http_get/http_post(+_http_utils) | 低 |
 | 批 3 | codegraph 五件套 | 高(1522 行,SQLite schema + FTS5 + BFS) |
-| 批 4 | file_remove/file_move | 低 |
+| 批 4 | (file_remove/file_move 已砍,无需移植) | — |
 | 批 5(可选) | db_query | 低 |
 
 > 建议顺序:批 1 → 批 2 → 批 4 → 批 3(codegraph 最重放后)。

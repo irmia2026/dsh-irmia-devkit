@@ -2,7 +2,7 @@
 
 为 **DeepSeek Harness**(Cordis)移植的 **Irmia DevKit** 精选工具集。
 
-从 DevKit v2.6.4 的 65 个工具中精选 13 个,补齐 Harness 原生缺失的能力;**保留的工具原样移植,零改造**(参数、防呆机制、返回协议全部保留);`safe_backups` 并入 `safe_rollback`(list 动作)。
+从 DevKit v2.6.4 的 65 个工具中精选 11 个,补齐 Harness 原生缺失的能力;**保留的工具原样移植,零改造**(参数、防呆机制、返回协议全部保留);`safe_backups` 并入 `safe_rollback`(list 动作)。
 
 ## 保留工具
 
@@ -11,7 +11,6 @@
 | 安全编辑链 | `safe_edit` / `safe_rollback` / `multi_edit` | 自动备份 → 编辑 → 语法检查 → 失败自动回滚;`safe_rollback(list=true)` 列出备份;跨文件原子批量编辑 |
 | 网络 | `http_get` / `http_post` | 内置 SSRF 防护(内网拦截 + 重定向逐跳复检) |
 | 代码理解 | `code_index` / `code_explore` / `code_diff_impact` / `code_pack` / `code_status` | 符号索引(AST + SQLite + FTS5)+ 调用图 BFS 查询 |
-| 删除/移动 | `file_remove` / `file_move` | 路径沙箱 + 系统目录黑名单 + 批量确认 |
 | 只读数据库 | `db_query` | SELECT/PRAGMA 白名单 + mode=ro 引擎层只读 |
 
 **砍掉的 51 个**:Harness 已有等价能力(rg_search→grep、es_search→glob、safe_read→read(原生已支持 offset/limit 翻页与续读 footer)、git 全族→bash git、gh 全族→bash gh、shell_exec→bash、op_log→平台会话记录、dir_*/text_filter/diff_strings…)或一条 bash 命令可替代(file_hash→sha256sum、file_zip→zip、disk_info→df、json_query→jq、encode→base64、lint_runner→ruff check、test_runner→pytest、symbol_rename→grep+multi_edit 组合…)。

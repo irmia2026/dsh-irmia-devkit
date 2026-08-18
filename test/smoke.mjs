@@ -85,9 +85,10 @@ check("bridge: db_query read-only", async () => {
   rmSync(dir, { recursive: true, force: true });
 });
 
-check("bridge: file_remove sandbox", async () => {
-  const r = await runTool(PYTHON, "file_remove", { path: "/etc/passwd" });
+check("bridge: path sandbox guards safe_edit (system dir)", async () => {
+  const r = await runTool(PYTHON, "safe_edit", { filepath: "/etc/passwd", old: "x", new: "y" });
   assert.strictEqual(r.ok, false);
+  assert.match(r.error, /禁止|拒绝/);
 });
 
 console.log(`\n${passed} passed, ${failed} failed`);

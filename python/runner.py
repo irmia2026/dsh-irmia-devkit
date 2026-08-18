@@ -24,7 +24,6 @@ from tools import config as _config  # noqa: E402
 from tools import safe_edit  # noqa: E402
 from tools import multi_edit  # noqa: E402
 from tools import http_get  # noqa: E402
-from tools import file_remove  # noqa: E402
 from tools import db_query  # noqa: E402
 from tools.codegraph import CodeGraph  # noqa: E402
 
@@ -111,9 +110,6 @@ DISPATCH = {
     "code_diff_impact": _code_diff_impact,
     "code_pack": _code_pack,
     "code_status": _code_status,
-    # 文件删除/移动
-    "file_remove": file_remove.remove,
-    "file_move": file_remove.move,
     # 可选
     "db_query": db_query.query,
 }
