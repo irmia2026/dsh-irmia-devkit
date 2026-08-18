@@ -1,4 +1,4 @@
-# dsh-irmia
+# irmia-devkit
 
 为 **DeepSeek Harness**(Cordis)移植的 **Irmia DevKit** 精选工具集。
 
@@ -36,16 +36,16 @@ JSON 结果返回模型
 
 ```sh
 # 从 npm(推荐,预构建产物直接可用)
-npx @deepseek-ai/dsh plugin --profile web add dsh-irmia
+npx @deepseek-ai/dsh plugin --profile web add irmia-devkit
 
 # 从 GitHub(锁定版本)
-npx @deepseek-ai/dsh plugin --profile web add github:irmia2026/dsh-irmia#v0.1.0
+npx @deepseek-ai/dsh plugin --profile web add github:irmia2026/irmia-devkit#v0.1.0
 ```
 
 安装后可先验证配置层再启动:
 
 ```sh
-npx @deepseek-ai/dsh --profile web --dump-config   # 应出现 "# == dsh-irmia" 层
+npx @deepseek-ai/dsh --profile web --dump-config   # 应出现 "# == irmia-devkit" 层
 npx @deepseek-ai/dsh web
 ```
 
