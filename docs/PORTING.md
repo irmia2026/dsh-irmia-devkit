@@ -14,10 +14,11 @@
 | `safe_edit.py` | 2 | safe_edit / safe_rollback(含 safe_backups 的 list 动作) | Harness 无备份-回滚-语法门禁能力 |
 | `multi_edit.py` | 1 | multi_edit | 跨文件原子批量编辑,Harness 无 |
 | `http_get.py` + `_http_utils.py` | 2 | http_get / http_post | SSRF 防护的取网能力,Harness 无(web_fetch 未启用) |
-| `codegraph.py` | 5 | code_index / code_explore / code_diff_impact / code_pack / code_status | 大仓库符号语义查询,Harness 只有 grep |
+| `codegraph.py` | 3 | code_index(含 code_status 的 status 动作)/ code_explore / code_diff_impact | 大仓库符号语义查询,Harness 只有 grep |
 
 > 注 1:`safe_read.py` 已从保留清单移除——原生 read 已支持 offset/limit 翻页与续读 footer,safe_read 的增量(编码检测/hex/skeleton)均可由一条 bash 命令覆盖,保留会造成模型在 read/safe_read 间选择的负担。
 > 注 2:`file_remove.py` 已从保留清单移除——file_move 是 `mv` 一条命令可替代;file_remove 的路径沙箱价值被平台层(安全编辑链路径校验保留,`_FORBIDDEN_PREFIXES` 黑名单迁入 `_file_utils.py`)覆盖,删除操作交还 bash `rm`。
+> 注 3:`code_pack.py` 工具已移除——code_explore + read 组合可达,现代长上下文模型按需精读更可控;`code_status` 并入 `code_index(status=true)`(与 safe_backups→safe_rollback 同构)。
 
 ### 可选 1 模块(要不要由你定)
 

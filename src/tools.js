@@ -97,17 +97,18 @@ export const toolDefinitions = [
   {
     name: "code_index",
     description:
-      "为项目建立符号索引(SQLite,存于项目 .codegraph/ 目录)。首次进项目全量建索引;后续改动少量文件用 incremental=true 增量更新。支持 Python(ast)与 JS/TS/Go/Rust/Java/C/C++(tree-sitter,可选)。",
+      "为项目建立符号索引(SQLite,存于项目 .codegraph/ 目录)。首次进项目全量建索引;后续改动少量文件用 incremental=true 增量更新。status=true 时输出索引体检(文件数/符号数/边数/索引时间/DB 大小/FTS 状态),不建索引。支持 Python(ast)与 JS/TS/Go/Rust/Java/C/C++(tree-sitter,可选)。",
     parameters: {
       project_dir: { type: "string", description: "项目根目录,默认当前目录" },
       incremental: { type: "boolean", description: "增量更新,默认 false" },
+      status: { type: "boolean", description: "只输出索引体检(不建索引),默认 false" },
     },
     output: jsonOutput,
   },
   {
     name: "code_explore",
     description:
-      "符号语义查询:「X 在哪定义」「谁调用了 X」「从X到Y的调用链」。先 code_index 建索引;查询用符号名(如 _auth_guard)而非自然语言。索引过期会返回 stale_warning。查不到时先 code_status 再考虑 rg_search。",
+      "符号语义查询:「X 在哪定义」「谁调用了 X」「从X到Y的调用链」。先 code_index 建索引;查询用符号名(如 _auth_guard)而非自然语言。索引过期会返回 stale_warning。查不到时先 code_index(status=true) 体检再考虑 rg_search。",
     parameters: {
       query: { type: "string", required: true, description: "符号名或查询(支持 kind:function 过滤)" },
       project_dir: { type: "string", description: "项目根目录,默认当前目录" },
@@ -120,25 +121,6 @@ export const toolDefinitions = [
     parameters: {
       filepaths: { type: "array", required: true, items: { type: "string" }, description: "改动的文件路径列表" },
       max_depth: { type: "integer", description: "影响深度,默认 3" },
-      project_dir: { type: "string", description: "项目根目录,默认当前目录" },
-    },
-    output: jsonOutput,
-  },
-  {
-    name: "code_pack",
-    description: "打包符号及其依赖链源码:以 target 符号为根沿调用边展开(双向),返回可直接阅读的依赖源码,总行数上限 2000。修 bug 需要完整上下文时用。",
-    parameters: {
-      target: { type: "string", required: true, description: "目标符号名" },
-      depth: { type: "integer", description: "展开深度,默认 2" },
-      mode: { type: "string", enum: ["both", "callers", "callees"], description: "展开方向,默认 both" },
-      project_dir: { type: "string", description: "项目根目录,默认当前目录" },
-    },
-    output: jsonOutput,
-  },
-  {
-    name: "code_status",
-    description: "索引体检:文件数/符号数/边数/索引时间/DB 大小/FTS 状态/缺失 grammar。code_explore 查不到时先查此工具。",
-    parameters: {
       project_dir: { type: "string", description: "项目根目录,默认当前目录" },
     },
     output: jsonOutput,

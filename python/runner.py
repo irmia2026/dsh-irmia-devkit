@@ -30,12 +30,15 @@ from tools.codegraph import CodeGraph  # noqa: E402
 
 # ── codegraph 工具包装(等价原 _registry.py 的 _code_* 薄包装) ──
 
-def _code_index(project_dir: str = ".", incremental: bool = False) -> dict:
+def _code_index(project_dir: str = ".", incremental: bool = False, status: bool = False) -> dict:
+    """code_index 合并工具:status=true 时输出索引体检(原 code_status),否则建/更新索引。"""
     from pathlib import Path
     root = Path(project_dir).resolve()
     db_path = str(root / ".codegraph" / "codegraph.db")
     cg = CodeGraph(db_path)
     try:
+        if status:
+            return cg.code_status()
         return cg.index(str(root), incremental)
     finally:
         cg.close()
@@ -63,28 +66,6 @@ def _code_diff_impact(filepaths: list, max_depth: int = 3, project_dir: str = ".
         cg.close()
 
 
-def _code_pack(target: str, depth: int = 2, mode: str = "both", project_dir: str = ".") -> dict:
-    from pathlib import Path
-    root = Path(project_dir).resolve()
-    db_path = str(root / ".codegraph" / "codegraph.db")
-    cg = CodeGraph(db_path)
-    try:
-        return cg.code_pack(target, depth, mode)
-    finally:
-        cg.close()
-
-
-def _code_status(project_dir: str = ".") -> dict:
-    from pathlib import Path
-    root = Path(project_dir).resolve()
-    db_path = str(root / ".codegraph" / "codegraph.db")
-    cg = CodeGraph(db_path)
-    try:
-        return cg.code_status()
-    finally:
-        cg.close()
-
-
 # ── safe_rollback / safe_backups 合并路由(list 动作) ──
 
 def _safe_rollback(filepath: str, backup_name: str | None = None, list: bool = False) -> dict:
@@ -108,8 +89,6 @@ DISPATCH = {
     "code_index": _code_index,
     "code_explore": _code_explore,
     "code_diff_impact": _code_diff_impact,
-    "code_pack": _code_pack,
-    "code_status": _code_status,
     # 可选
     "db_query": db_query.query,
 }
