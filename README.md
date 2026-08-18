@@ -2,13 +2,13 @@
 
 为 **DeepSeek Harness**(Cordis)移植的 **Irmia DevKit** 精选工具集。
 
-从 DevKit v2.6.4 的 65 个工具中精选 14 个,补齐 Harness 原生缺失的能力;**保留的工具原样移植,零改造**(参数、防呆机制、返回协议全部保留)。
+从 DevKit v2.6.4 的 65 个工具中精选 13 个,补齐 Harness 原生缺失的能力;**保留的工具原样移植,零改造**(参数、防呆机制、返回协议全部保留);`safe_backups` 并入 `safe_rollback`(list 动作)。
 
 ## 保留工具
 
 | 分组 | 工具 | 说明 |
 |---|---|---|
-| 安全编辑链 | `safe_edit` / `safe_rollback` / `safe_backups` / `multi_edit` | 自动备份 → 编辑 → 语法检查 → 失败自动回滚;跨文件原子批量编辑 |
+| 安全编辑链 | `safe_edit` / `safe_rollback` / `multi_edit` | 自动备份 → 编辑 → 语法检查 → 失败自动回滚;`safe_rollback(list=true)` 列出备份;跨文件原子批量编辑 |
 | 网络 | `http_get` / `http_post` | 内置 SSRF 防护(内网拦截 + 重定向逐跳复检) |
 | 代码理解 | `code_index` / `code_explore` / `code_diff_impact` / `code_pack` / `code_status` | 符号索引(AST + SQLite + FTS5)+ 调用图 BFS 查询 |
 | 删除/移动 | `file_remove` / `file_move` | 路径沙箱 + 系统目录黑名单 + 批量确认 |

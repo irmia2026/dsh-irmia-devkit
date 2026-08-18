@@ -86,13 +86,21 @@ def _code_status(project_dir: str = ".") -> dict:
         cg.close()
 
 
+# ── safe_rollback / safe_backups 合并路由(list 动作) ──
+
+def _safe_rollback(filepath: str, backup_name: str | None = None, list: bool = False) -> dict:
+    """safe_rollback 合并工具:list=true 时列出备份(原 safe_backups),否则执行回滚(原 safe_rollback)。"""
+    if list:
+        return safe_edit.list_backups(filepath)
+    return safe_edit.rollback(filepath, backup_name)
+
+
 # ── 工具注册映射(等价原 _registry.py 的 _ALL_TOOLS 键) ──
 
 DISPATCH = {
     # 安全编辑链
     "safe_edit": safe_edit.edit,
-    "safe_rollback": safe_edit.rollback,
-    "safe_backups": safe_edit.list_backups,
+    "safe_rollback": _safe_rollback,
     "multi_edit": multi_edit.run,
     # 网络
     "http_get": http_get.get,

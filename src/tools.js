@@ -30,18 +30,12 @@ export const toolDefinitions = [
   },
   {
     name: "safe_rollback",
-    description: "回滚文件到指定备份。backup_name 省略时回滚到最近备份;回滚前自动备份当前状态(可再回滚撤销)。",
+    description:
+      "回滚文件到备份,或列出可回滚的备份。list=true 时列出该文件的备份(不执行回滚);否则执行回滚:backup_name 省略时回滚到最近备份,回滚前自动备份当前状态(可再回滚撤销)。",
     parameters: {
       filepath: { type: "string", required: true, description: "目标文件路径" },
-      backup_name: { type: "string", description: "备份文件名(见 safe_backups 输出),省略则用最近备份" },
-    },
-    output: jsonOutput,
-  },
-  {
-    name: "safe_backups",
-    description: "列出某文件的备份(默认全部备份)。与 safe_rollback 配合使用。",
-    parameters: {
-      filepath: { type: "string", description: "按文件过滤;省略则列出全部" },
+      backup_name: { type: "string", description: "备份文件名(见 list=true 的输出),省略则用最近备份" },
+      list: { type: "boolean", description: "列出该文件的备份(不执行回滚),默认 false" },
     },
     output: jsonOutput,
   },

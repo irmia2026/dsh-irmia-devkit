@@ -11,7 +11,7 @@
 
 | 模块 | 注册工具数 | 工具 | 保留理由(有用且好用) |
 |---|---|---|---|
-| `safe_edit.py` | 3 | safe_edit / safe_rollback / safe_backups | Harness 无备份-回滚-语法门禁能力 |
+| `safe_edit.py` | 2 | safe_edit / safe_rollback(含 safe_backups 的 list 动作) | Harness 无备份-回滚-语法门禁能力 |
 | `multi_edit.py` | 1 | multi_edit | 跨文件原子批量编辑,Harness 无 |
 | `http_get.py` + `_http_utils.py` | 2 | http_get / http_post | SSRF 防护的取网能力,Harness 无(web_fetch 未启用) |
 | `codegraph.py` | 5 | code_index / code_explore / code_diff_impact / code_pack / code_status | 大仓库符号语义查询,Harness 只有 grep |
