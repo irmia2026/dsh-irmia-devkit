@@ -19,13 +19,13 @@
 
 > 注:`safe_read.py` 已从保留清单移除——原生 read 已支持 offset/limit 翻页与续读 footer,safe_read 的增量(编码检测/hex/skeleton)均可由一条 bash 命令覆盖,保留会造成模型在 read/safe_read 间选择的负担。
 
-### 可选 3 模块(要不要由你定)
+### 可选 1 模块(要不要由你定)
 
 | 模块 | 注册工具数 | 工具 | 说明 |
 |---|---|---|---|
 | `db_query.py` | 1 | db_query | 只读 SQLite,防手滑写坏本地库 |
-| `symbol_rename.py` | 1 | symbol_rename | 多文件 token 级重命名 |
-| `lint_runner.py` + `test_runner.py` | 2 | lint_runner / test_runner | 改完代码的质量/测试验证 |
+
+> 注:`symbol_rename.py` / `lint_runner.py` / `test_runner.py` 已从保留清单移除——均属"bash 一条命令可替代 + 无安全属性"类别(symbol_rename 可 grep+multi_edit 组合;lint_runner 即 `ruff check`;test_runner 即 `pytest`),且 test_runner 连带的 `shell_exec.py` 一并清理。
 
 ---
 
@@ -70,6 +70,6 @@
 | 批 2 | http_get/http_post(+_http_utils) | 低 |
 | 批 3 | codegraph 五件套 | 高(1522 行,SQLite schema + FTS5 + BFS) |
 | 批 4 | file_remove/file_move | 低 |
-| 批 5(可选) | db_query / symbol_rename / lint_runner+test_runner | 中 |
+| 批 5(可选) | db_query | 低 |
 
 > 建议顺序:批 1 → 批 2 → 批 4 → 批 3(codegraph 最重放后)。

@@ -26,9 +26,6 @@ from tools import multi_edit  # noqa: E402
 from tools import http_get  # noqa: E402
 from tools import file_remove  # noqa: E402
 from tools import db_query  # noqa: E402
-from tools import symbol_rename  # noqa: E402
-from tools import lint_runner  # noqa: E402
-from tools import test_runner  # noqa: E402
 from tools.codegraph import CodeGraph  # noqa: E402
 
 
@@ -111,9 +108,6 @@ DISPATCH = {
     "file_move": file_remove.move,
     # 可选
     "db_query": db_query.query,
-    "symbol_rename": symbol_rename.run,
-    "lint_runner": lint_runner.run,
-    "test_runner": test_runner.run,
 }
 
 

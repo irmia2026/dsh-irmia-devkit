@@ -171,8 +171,6 @@ export const toolDefinitions = [
     },
     output: jsonOutput,
   },
-
-  // ── 可选工具 ────────────────────────────────────────────────
   {
     name: "db_query",
     description: "只读查询 SQLite 数据库:仅允许 SELECT/PRAGMA(mode=ro 引擎层只读双保险),参数化查询防注入。不支持写操作。",
@@ -180,39 +178,6 @@ export const toolDefinitions = [
       db_path: { type: "string", required: true, description: "SQLite 数据库文件路径" },
       sql: { type: "string", required: true, description: "SELECT 或 PRAGMA 查询语句" },
       params: { type: "array", items: { type: "json" }, description: "查询参数列表,如 [42, \"active\"]" },
-    },
-    output: jsonOutput,
-  },
-  {
-    name: "symbol_rename",
-    description:
-      "多文件符号重命名:token 级替换(不碰字符串/注释/关键字),默认 dry_run 预览;跨文件时需 confirm_multi_file=true;新名冲突自动拒绝;最终经 multi_edit 原子提交+语法检查。需先 code_index。",
-    parameters: {
-      old: { type: "string", required: true, description: "旧符号名(如 foo 或 Class.method)" },
-      new: { type: "string", required: true, description: "新符号名(合法标识符,非 Python 关键字)" },
-      project_dir: { type: "string", description: "项目根目录,默认当前目录" },
-      dry_run: { type: "boolean", description: "只预览不落盘,默认 true" },
-      confirm_multi_file: { type: "boolean", description: "跨文件重命名确认,默认 false" },
-    },
-    output: jsonOutput,
-  },
-  {
-    name: "lint_runner",
-    description: "代码质量检查:auto 自动探测 ruff → pylint → eslint(JS/TS),输出结构化 issues 并附代码上下文。与 syntax_check(能否跑)互补。",
-    parameters: {
-      filepath: { type: "string", required: true, description: "文件路径" },
-      linter: { type: "string", enum: ["auto", "ruff", "pylint", "eslint"], description: "指定 linter,默认 auto" },
-    },
-    output: jsonOutput,
-  },
-  {
-    name: "test_runner",
-    description: "统一测试执行:pytest/go test/cargo test/jest 自动发现(py 项目默认 pytest -q)。test_cmd 覆盖时经白名单校验。返回结构化 passed/failed/skipped。",
-    parameters: {
-      filepath: { type: "string", description: "用于定位项目根的文件(可选)" },
-      project_dir: { type: "string", description: "项目根目录,默认当前目录" },
-      test_cmd: { type: "string", description: "自定义测试命令(可选,需在白名单内)" },
-      timeout: { type: "integer", description: "超时秒数,默认 120,范围 1-600" },
     },
     output: jsonOutput,
   },
