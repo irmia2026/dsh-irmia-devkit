@@ -1,6 +1,6 @@
-# dsh-tool-irmia-devkit — configuration layer contributed by this bundle.
+# dsh-irmia — configuration layer contributed by this bundle.
 # Registers the plugin row under its npm package name so Node module
 # resolution finds the installed package.
 - insert:
     - id: tool-irmia-devkit
-      name: dsh-tool-irmia-devkit
+      name: dsh-irmia
