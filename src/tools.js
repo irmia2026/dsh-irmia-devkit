@@ -13,7 +13,7 @@ export const toolDefinitions = [
   {
     name: "safe_edit",
     description:
-      "安全编辑文件(改代码首选):自动备份 → 精确替换 → 语法检查 → 通过保留/失败自动回滚。支持 mode: replace(默认,old→new 文本替换)/ insert_at_line(在 line 行后插入 new,line=0 为文件开头)/ delete_lines(删除 start_line~end_line 闭区间行)。old 多处匹配时用 occurrence=N 指定第几次,或 replace_all=true 全替换。",
+      "Edit code files safely: auto-backup, exact replace, syntax gate, and rollback on failure. Prefer this over the plain edit tool for code — it cannot leave a broken file behind. Modes: replace / insert_at_line / delete_lines.",
     parameters: {
       filepath: { type: "string", required: true, description: "文件路径" },
       old: { type: "string", description: "要被替换的旧文本(精确匹配,含缩进)。mode=replace 时必填" },
@@ -31,7 +31,7 @@ export const toolDefinitions = [
   {
     name: "safe_rollback",
     description:
-      "回滚文件到备份,或列出可回滚的备份。list=true 时列出该文件的备份(不执行回滚);否则执行回滚:backup_name 省略时回滚到最近备份,回滚前自动备份当前状态(可再回滚撤销)。",
+      "Restore a file from an auto-backup created by safe_edit, or list backups with list=true. Omit backup_name to restore the most recent one; the current state is snapshotted first so the rollback itself can be undone.",
     parameters: {
       filepath: { type: "string", required: true, description: "目标文件路径" },
       backup_name: { type: "string", description: "备份文件名(见 list=true 的输出),省略则用最近备份" },
@@ -42,7 +42,7 @@ export const toolDefinitions = [
   {
     name: "multi_edit",
     description:
-      "跨文件/同文件多处编辑的原子批量工具:全部编辑语法检查通过后一次性提交,任一失败全体回滚。edits 每项 {file, old, new, replace_all?, occurrence?};同文件多项按顺序链式应用(后一项的 old 必须匹配前一项应用后的内容)。",
+      "Apply many edits across files in one atomic call: all files are syntax-checked before anything is written, and any failure rolls everything back. One call replaces a chain of edit calls. Each item: {file, old, new, replace_all?}.",
     parameters: {
       edits: {
         type: "array",
@@ -70,7 +70,7 @@ export const toolDefinitions = [
   {
     name: "http_get",
     description:
-      "HTTP GET 请求,内置 SSRF 防护(拒绝内网/保留地址,重定向逐跳复检),响应最大 5MB。format: markdown(默认,HTML 转文本)/ text / html。长文自动分页(offset 翻页)。",
+      "Fetch a URL with built-in SSRF protection (blocks internal/private addresses and re-checks every redirect). The only network fetch tool with safety guards — use instead of raw curl. format: markdown / text / html.",
     parameters: {
       url: { type: "string", required: true, description: "目标 URL" },
       headers: { type: "object", additionalProperties: true, description: "自定义请求头(可选)" },
@@ -83,7 +83,7 @@ export const toolDefinitions = [
   },
   {
     name: "http_post",
-    description: "HTTP POST 请求,内置 SSRF 防护。data 可以是 dict(自动 JSON)或字符串。",
+    description: "POST to a URL with the same SSRF protection as http_get. data accepts a JSON object (auto-serialized) or a raw string.",
     parameters: {
       url: { type: "string", required: true, description: "目标 URL" },
       data: { type: "json", description: "请求体:dict(自动 JSON)或字符串" },
@@ -97,7 +97,7 @@ export const toolDefinitions = [
   {
     name: "code_index",
     description:
-      "为项目建立符号索引(SQLite,存于项目 .codegraph/ 目录)。首次进项目全量建索引;后续改动少量文件用 incremental=true 增量更新。status=true 时输出索引体检(文件数/符号数/边数/索引时间/DB 大小/FTS 状态),不建索引。支持 Python(ast)与 JS/TS/Go/Rust/Java/C/C++(tree-sitter,可选)。",
+      "Build the symbol index a project needs for code_explore (stored in .codegraph/). Run once per project, then incremental=true for small changes; status=true reports index health without re-indexing. Python via ast; other languages via optional tree-sitter.",
     parameters: {
       project_dir: { type: "string", description: "项目根目录,默认当前目录" },
       incremental: { type: "boolean", description: "增量更新,默认 false" },
@@ -108,7 +108,7 @@ export const toolDefinitions = [
   {
     name: "code_explore",
     description:
-      "符号语义查询:「X 在哪定义」「谁调用了 X」「从X到Y的调用链」。先 code_index 建索引;查询用符号名(如 _auth_guard)而非自然语言。索引过期会返回 stale_warning。查不到时先 code_index(status=true) 体检再考虑 rg_search。",
+      "Semantic symbol queries: where X is defined, who calls X, and call paths X→Y. Requires code_index first. Use exact symbol names (e.g. _auth_guard), not natural language. Far more precise than grep for large repositories.",
     parameters: {
       query: { type: "string", required: true, description: "符号名或查询(支持 kind:function 过滤)" },
       project_dir: { type: "string", description: "项目根目录,默认当前目录" },
@@ -117,7 +117,7 @@ export const toolDefinitions = [
   },
   {
     name: "code_diff_impact",
-    description: "改动影响范围分析:输入改动文件列表,输出受影响的符号与文件(反向 BFS,max_depth 层)。commit 前自查用。",
+    description: "Analyze what a change breaks: given changed files, returns affected symbols and files via reverse BFS. Run before committing to catch hidden callers that grep would miss.",
     parameters: {
       filepaths: { type: "array", required: true, items: { type: "string" }, description: "改动的文件路径列表" },
       max_depth: { type: "integer", description: "影响深度,默认 3" },
@@ -129,7 +129,7 @@ export const toolDefinitions = [
   // ── 只读数据库 ─────────────────────────────────────────────
   {
     name: "db_query",
-    description: "只读查询 SQLite 数据库:仅允许 SELECT/PRAGMA(mode=ro 引擎层只读双保险),参数化查询防注入。不支持写操作。",
+    description: "Read-only SQLite queries: only SELECT/PRAGMA allowed with engine-level read-only enforcement and parameterized queries. The safe way to inspect local databases — cannot modify data.",
     parameters: {
       db_path: { type: "string", required: true, description: "SQLite 数据库文件路径" },
       sql: { type: "string", required: true, description: "SELECT 或 PRAGMA 查询语句" },
