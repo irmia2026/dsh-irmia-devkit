@@ -52,6 +52,21 @@ JSON 结果返回模型
 |---|---|---|
 | `pythonPath` | `python3` | 运行 Python 工具的可执行文件 |
 
+## 迭代计划(已确认保留,待实施)
+
+当前版本以 Python 桥承载工具核心(原样移植)。后续迭代方向:**纯 JS 重写,去掉 python3 运行时依赖**。JS 生态对应库已验证可用:
+
+| Python 能力 | JS 对应 | 状态 |
+|---|---|---|
+| `ast.parse`(Python 语法检查) | tree-sitter-python(ERROR 节点检测) | 需 npm 安装 |
+| `sqlite3` + FTS5 + mode=ro | `node:sqlite`(Node 22+ 内置) | ✅ 已验证 |
+| urllib + ipaddress(SSRF) | node:http/https + dns.lookup | 原生 |
+| trafilatura/markdownify/bs4 | turndown | 宿主已有 |
+| difflib / 自研匹配 | diff | 宿主已有 |
+| tree-sitter 多语言索引 | tree-sitter 官方 JS 包 | 生态更全 |
+
+附带收益:统一用 tree-sitter 做语法门禁与代码索引,消除原版"ast + tree-sitter 两套解析器"的不一致。
+
 ## 测试
 
 ```bash
