@@ -1,0 +1,36 @@
+{
+  "name": "dsh-tool-irmia-devkit",
+  "version": "0.1.0",
+  "description": "Curated Irmia DevKit tools ported to the DeepSeek Harness: safe_edit / safe_rollback / safe_backups / multi_edit / safe_read / http_get / http_post / code_index / code_explore / code_diff_impact / code_pack / code_status / file_remove / file_move, plus db_query / symbol_rename / lint_runner / test_runner.",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "src",
+    "python"
+  ],
+  "license": "MIT",
+  "peerDependencies": {
+    "@deepseek-ai/dsh-tools": "^0.1.0",
+    "@deepseek-ai/schemastery": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "deepseek-harness",
+    "cordis",
+    "plugin",
+    "irmia",
+    "devkit",
+    "safe-edit",
+    "codegraph"
+  ],
+  "scripts": {
+    "test": "node test/smoke.mjs"
+  }
+}
