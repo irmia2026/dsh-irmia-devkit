@@ -7,16 +7,17 @@
 
 ## 一、保留清单(原样移植,不改造)
 
-### 核心 6 模块(真实缺口,Harness 没有)
+### 核心 5 模块(真实缺口,Harness 没有)
 
 | 模块 | 注册工具数 | 工具 | 保留理由(有用且好用) |
 |---|---|---|---|
 | `safe_edit.py` | 3 | safe_edit / safe_rollback / safe_backups | Harness 无备份-回滚-语法门禁能力 |
 | `multi_edit.py` | 1 | multi_edit | 跨文件原子批量编辑,Harness 无 |
-| `safe_read.py` | 1 | safe_read | 自动编码检测(GB18030)+ hex 预览,补 Harness read 仅 UTF-8 的短板 |
 | `http_get.py` + `_http_utils.py` | 2 | http_get / http_post | SSRF 防护的取网能力,Harness 无(web_fetch 未启用) |
 | `codegraph.py` | 5 | code_index / code_explore / code_diff_impact / code_pack / code_status | 大仓库符号语义查询,Harness 只有 grep |
 | `file_remove.py` | 2 | file_remove / file_move | Harness 无删除工具 |
+
+> 注:`safe_read.py` 已从保留清单移除——原生 read 已支持 offset/limit 翻页与续读 footer,safe_read 的增量(编码检测/hex/skeleton)均可由一条 bash 命令覆盖,保留会造成模型在 read/safe_read 间选择的负担。
 
 ### 可选 3 模块(要不要由你定)
 
@@ -44,9 +45,9 @@
 
 ---
 
-## 三、砍掉清单(56 个工具,不再赘述改造理由)
+## 三、砍掉清单(48 个工具,不再赘述改造理由)
 
-按三大类:Harness 已有等价(git 全族/gh 全族/rg_search/es_search/dir_*/shell_exec/op_log/text_filter/diff_strings)、一条 bash 命令可替代(file_hash/file_zip/disk_info/port_check/proc_list/sys_snapshot/encode/time/uuid/semver/json_query/csv_*/html_extract/log_parse/md_strip/http_download/file_move)、低价值或冗余(project_init/git_changelog/dep_scan/config_diff/tool_stats/lint_runner/test_runner/encode_decode)。
+按三大类:Harness 已有等价(git 全族/gh 全族/rg_search/es_search/safe_read/dir_*/shell_exec/op_log/text_filter/diff_strings)、一条 bash 命令可替代(file_hash/file_zip/disk_info/port_check/proc_list/sys_snapshot/encode/time/uuid/semver/json_query/csv_*/html_extract/log_parse/md_strip/http_download/file_move)、低价值或冗余(project_init/git_changelog/dep_scan/config_diff/tool_stats/lint_runner/test_runner/encode_decode)。
 
 ---
 
@@ -65,7 +66,7 @@
 
 | 批次 | 内容 | 复杂度 |
 |---|---|---|
-| 批 1 | safe_edit 家族 + multi_edit + safe_read(+随迁 _file_utils/_helpers/syntax_check/file_patch) | 中(依赖链长,但纯 Python 搬运) |
+| 批 1 | safe_edit 家族 + multi_edit(+随迁 _file_utils/_helpers/syntax_check/file_patch) | 中(依赖链长,但纯 Python 搬运) |
 | 批 2 | http_get/http_post(+_http_utils) | 低 |
 | 批 3 | codegraph 五件套 | 高(1522 行,SQLite schema + FTS5 + BFS) |
 | 批 4 | file_remove/file_move | 低 |

@@ -72,28 +72,6 @@ export const toolDefinitions = [
     output: jsonOutput,
   },
 
-  // ── 文件系统 ────────────────────────────────────────────────
-  {
-    name: "safe_read",
-    description:
-      "增强读取:自动编码检测(UTF-8/GB18030/UTF-16 等)+ 行范围/head/tail/hex 二进制预览/skeleton 结构预览。返回带行号前缀的内容与分页提示(next_call)。大文件限 10MB,每次最多 200 行/128KB。",
-    parameters: {
-      path: { type: "string", required: true, description: "文件路径" },
-      start_line: { type: "integer", description: "起始行号(1-based,0=从头)" },
-      end_line: { type: "integer", description: "结束行号(0=到末尾)" },
-      max_lines: { type: "integer", description: "每页行数,默认 200" },
-      offset: { type: "integer", description: "hex 模式字节偏移" },
-      limit_bytes: { type: "integer", description: "hex 模式读取字节数上限" },
-      encoding: { type: "string", enum: ["auto", "utf-8", "gbk", "latin-1"], description: "编码,默认 auto 自动检测" },
-      mode: { type: "string", enum: ["auto", "text", "binary", "hex", "skeleton"], description: "读取模式,默认 auto" },
-      head: { type: "integer", description: "只读前 N 行(优先级高于行范围)" },
-      tail: { type: "integer", description: "只读后 N 行" },
-      line_numbers: { type: "boolean", description: "是否带行号前缀,默认 true" },
-      include_metadata: { type: "boolean", description: "是否返回 mtime/permissions 等元数据" },
-    },
-    output: jsonOutput,
-  },
-
   // ── 网络 ────────────────────────────────────────────────────
   {
     name: "http_get",

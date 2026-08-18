@@ -23,7 +23,6 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from tools import config as _config  # noqa: E402
 from tools import safe_edit  # noqa: E402
 from tools import multi_edit  # noqa: E402
-from tools import safe_read  # noqa: E402
 from tools import http_get  # noqa: E402
 from tools import file_remove  # noqa: E402
 from tools import db_query  # noqa: E402
@@ -98,8 +97,6 @@ DISPATCH = {
     "safe_rollback": safe_edit.rollback,
     "safe_backups": safe_edit.list_backups,
     "multi_edit": multi_edit.run,
-    # 文件系统
-    "safe_read": safe_read.read,
     # 网络
     "http_get": http_get.get,
     "http_post": http_get.post,

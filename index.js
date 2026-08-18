@@ -22,7 +22,7 @@ function apply(ctx, config) {
   ctx.systemPrompt.section({
     name: "tool:irmia-devkit",
     order: 150,
-    text: "This plugin ports a curated set of tools from Irmia DevKit. Prefer safe_edit (auto backup + syntax gate + rollback) over plain edit for code files; use multi_edit for batched cross-file edits; use safe_read when encoding detection or hex preview is needed; use code_explore/code_index for symbol-level queries in large repositories.",
+    text: "This plugin ports a curated set of tools from Irmia DevKit. Prefer safe_edit (auto backup + syntax gate + rollback) over plain edit for code files; use multi_edit for batched cross-file edits; use code_explore/code_index for symbol-level queries in large repositories.",
   });
 }
 

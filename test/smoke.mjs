@@ -34,16 +34,6 @@ for (const def of toolDefinitions) {
 }
 
 // 2. Python bridge executes real tools.
-check("bridge: safe_read head", async () => {
-  const dir = mkdtempSync(path.join(tmpdir(), "dk-smoke-"));
-  const f = path.join(dir, "a.txt");
-  writeFileSync(f, "line1\nline2\nline3\n", "utf8");
-  const r = await runTool(PYTHON, "safe_read", { path: f, head: 2 });
-  assert.strictEqual(r.ok, true);
-  assert.strictEqual(r.returned_lines, 2);
-  rmSync(dir, { recursive: true, force: true });
-});
-
 check("bridge: safe_edit backup + syntax + rollback", async () => {
   const dir = mkdtempSync(path.join(tmpdir(), "dk-smoke-"));
   const f = path.join(dir, "m.py");
