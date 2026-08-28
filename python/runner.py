@@ -9,6 +9,10 @@ runner 负责:
   2. 按工具名 dispatch 到对应模块函数(等价原 _registry.py 的注册映射);
   3. 空字符串参数清洗为 None(等价原 make_tool 的 clean 步骤);
   4. 结果与异常统一 JSON 序列化到 stdout。
+
+参数传输:JSON args 可经 argv[2] 传入(向后兼容、便于手工调试),也可经
+stdin 传入(JS 桥默认方式——大体积 safe_edit/multi_edit 的 JSON 会超过
+Windows ~32K 命令行上限)。stdin 按 UTF-8 解码,与 JS 侧固定 UTF-8 编解码一致。
 """
 
 from __future__ import annotations
@@ -16,6 +20,22 @@ from __future__ import annotations
 import json
 import os
 import sys
+
+
+def _force_utf8_stdio() -> None:
+    """强制 stdout/stderr 使用 UTF-8,与 JS 侧的固定 UTF-8 解码保持一致。
+
+    Windows 中文区域设置下 Python stdio 默认 GBK;工具结果一旦含 GBK 不支持的
+    字符(如 code_index 状态输出里的 ✅),print 会直接抛 UnicodeEncodeError,
+    整个工具调用失败。在 tools 包导入之前执行,连导入期的告警输出也覆盖。
+    """
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is not None:
+            reconfigure(encoding="utf-8", errors="replace")
+
+
+_force_utf8_stdio()
 
 # 使本目录下的 tools 包可导入(无论从何处调用)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -99,6 +119,30 @@ def _clean_args(args: dict) -> dict:
     return {k: (v if v != "" else None) for k, v in args.items()}
 
 
+def _read_args() -> tuple[dict | None, str | None]:
+    """读取 JSON 参数对象:优先 argv[2](向后兼容),否则读 stdin(UTF-8)。
+
+    stdin 途径规避 Windows ~32K 命令行长度上限;显式按 UTF-8 解码,
+    不受系统区域设置(如 GBK)影响。返回 (args, error),二者恰其一为 None。
+    """
+    if len(sys.argv) > 2 and sys.argv[2]:
+        raw = sys.argv[2]
+    elif sys.stdin.isatty():
+        # 交互式终端无输入来源,按空参数处理(避免挂起等待输入)
+        return {}, None
+    else:
+        raw = sys.stdin.buffer.read().decode("utf-8")
+    if not raw.strip():
+        return {}, None
+    try:
+        args = json.loads(raw)
+    except json.JSONDecodeError as e:
+        return None, f"invalid json args: {e}"
+    if not isinstance(args, dict):
+        return None, "args must be a JSON object"
+    return args, None
+
+
 def main() -> int:
     if len(sys.argv) < 2:
         print(json.dumps({"ok": False, "error": "usage: runner.py <tool> [json-args]"}, ensure_ascii=False))
@@ -108,13 +152,9 @@ def main() -> int:
     if fn is None:
         print(json.dumps({"ok": False, "error": f"unknown tool: {tool}"}, ensure_ascii=False))
         return 2
-    try:
-        raw_args = json.loads(sys.argv[2]) if len(sys.argv) > 2 and sys.argv[2] else {}
-    except json.JSONDecodeError as e:
-        print(json.dumps({"ok": False, "error": f"invalid json args: {e}"}, ensure_ascii=False))
-        return 2
-    if not isinstance(raw_args, dict):
-        print(json.dumps({"ok": False, "error": "args must be a JSON object"}, ensure_ascii=False))
+    raw_args, error = _read_args()
+    if error is not None:
+        print(json.dumps({"ok": False, "error": error}, ensure_ascii=False))
         return 2
     try:
         result = fn(**_clean_args(raw_args))

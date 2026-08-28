@@ -19,11 +19,15 @@ const MAX_OUTPUT_BYTES = 64 * 1024 * 1024; // 64MB; code_pack can be large
 export function runTool(pythonPath, toolName, args, exec = {}) {
   const input = JSON.stringify(args ?? {});
   return new Promise((resolve, reject) => {
-    execFile(
+    const child = execFile(
       pythonPath,
-      [RUNNER, toolName, input],
+      [RUNNER, toolName],
       {
         encoding: "utf8",
+        // The runner also reconfigures its own stdio; this belt-and-braces env
+        // covers interpreter startup output and keeps stdio UTF-8 even if the
+        // runner is invoked without its preamble (e.g. partial checkout).
+        env: { ...process.env, PYTHONIOENCODING: "utf-8" },
         maxBuffer: MAX_OUTPUT_BYTES,
         signal: exec.signal,
         windowsHide: true,
@@ -44,5 +48,11 @@ export function runTool(pythonPath, toolName, args, exec = {}) {
         }
       },
     );
+    // Args travel over stdin, not argv: a large safe_edit/multi_edit payload
+    // can exceed the ~32K Windows command-line limit. runner.py keeps the
+    // argv[2] form for manual debugging. EPIPE here only means the child
+    // failed to start; the execFile callback above already reports it.
+    child.stdin.on("error", () => {});
+    child.stdin.end(input);
   });
 }

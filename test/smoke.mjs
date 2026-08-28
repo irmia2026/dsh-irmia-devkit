@@ -13,9 +13,12 @@ const PYTHON = process.env.PYTHON ?? "python3";
 let passed = 0;
 let failed = 0;
 
-function check(name, fn) {
+// check() must await fn: the bridge tests are async, and a fire-and-forget
+// promise would make every failure invisible (and process.exit would cut the
+// still-running Python children off mid-flight).
+async function check(name, fn) {
   try {
-    fn();
+    await fn();
     passed += 1;
     console.log(`  ok  ${name}`);
   } catch (e) {
@@ -26,7 +29,7 @@ function check(name, fn) {
 
 // 1. Every definition compiles through defineTool (schemas are valid).
 for (const def of toolDefinitions) {
-  check(`schema: ${def.name}`, () => {
+  await check(`schema: ${def.name}`, () => {
     const tool = defineTool({ ...def, execute: async () => ({ ok: true }) });
     assert.strictEqual(tool.name, def.name);
     assert.ok(tool.parameters, "parameters missing");
@@ -34,7 +37,7 @@ for (const def of toolDefinitions) {
 }
 
 // 2. Python bridge executes real tools.
-check("bridge: safe_edit backup + syntax + rollback", async () => {
+await check("bridge: safe_edit backup + syntax + rollback", async () => {
   const dir = mkdtempSync(path.join(tmpdir(), "dk-smoke-"));
   const f = path.join(dir, "m.py");
   writeFileSync(f, "def foo():\n    return 1\n", "utf8");
@@ -48,7 +51,7 @@ check("bridge: safe_edit backup + syntax + rollback", async () => {
   rmSync(dir, { recursive: true, force: true });
 });
 
-check("bridge: multi_edit atomic", async () => {
+await check("bridge: multi_edit atomic", async () => {
   const dir = mkdtempSync(path.join(tmpdir(), "dk-smoke-"));
   const f1 = path.join(dir, "a.py");
   const f2 = path.join(dir, "b.py");
@@ -66,17 +69,20 @@ check("bridge: multi_edit atomic", async () => {
   rmSync(dir, { recursive: true, force: true });
 });
 
-check("bridge: http_get SSRF blocked", async () => {
+await check("bridge: http_get SSRF blocked", async () => {
   const r = await runTool(PYTHON, "http_get", { url: "http://127.0.0.1/" });
   assert.strictEqual(r.ok, false);
   assert.match(r.error, /内网|禁止/);
 });
 
-check("bridge: db_query read-only", async () => {
+await check("bridge: db_query read-only", async () => {
   const dir = mkdtempSync(path.join(tmpdir(), "dk-smoke-"));
   const db = path.join(dir, "t.db");
   const { execFileSync } = await import("node:child_process");
-  execFileSync(PYTHON, ["-c", `import sqlite3; c=sqlite3.connect('${db}'); c.execute('create table t(a)'); c.execute('insert into t values (1)'); c.commit()`]);
+  // Forward slashes: sqlite accepts them on every platform, and a backslash
+  // path inside the inline Python string would mangle sequences like \t.
+  const dbUrl = db.replaceAll("\\", "/");
+  execFileSync(PYTHON, ["-c", `import sqlite3; c=sqlite3.connect('${dbUrl}'); c.execute('create table t(a)'); c.execute('insert into t values (1)'); c.commit()`]);
   const r = await runTool(PYTHON, "db_query", { db_path: db, sql: "select * from t" });
   assert.strictEqual(r.ok, true);
   assert.strictEqual(r.count, 1);
@@ -85,10 +91,41 @@ check("bridge: db_query read-only", async () => {
   rmSync(dir, { recursive: true, force: true });
 });
 
-check("bridge: path sandbox guards safe_edit (system dir)", async () => {
-  const r = await runTool(PYTHON, "safe_edit", { filepath: "/etc/passwd", old: "x", new: "y" });
+await check("bridge: path sandbox guards safe_edit (system dir)", async () => {
+  // The forbidden-prefix list is checked after resolve(): on Windows a POSIX
+  // path like /etc/passwd resolves onto the current drive (D:\etc\passwd) and
+  // is no system dir at all, so use the platform's real system directory.
+  const target = process.platform === "win32" ? "C:/Windows/System32/drivers/etc/hosts" : "/etc/passwd";
+  const r = await runTool(PYTHON, "safe_edit", { filepath: target, old: "x", new: "y" });
   assert.strictEqual(r.ok, false);
   assert.match(r.error, /禁止|拒绝/);
+});
+
+// 3. Regressions: Windows zh-CN locale (GBK stdio) and the command-line limit.
+await check("bridge: utf-8 stdio survives non-locale chars", async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), "dk-smoke-"));
+  // code_index status output embeds ✅, which is not representable in GBK;
+  // on a zh-CN Windows host an unreconfigured print() dies with
+  // UnicodeEncodeError. The result must survive the round trip intact.
+  const r = await runTool(PYTHON, "code_index", { project_dir: dir, status: true });
+  assert.strictEqual(r.ok, true);
+  assert.ok(r.language_support.includes("✅"), "emoji lost in transit");
+  rmSync(dir, { recursive: true, force: true });
+});
+
+await check("bridge: stdin args beyond the ~32K command-line limit", async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), "dk-smoke-"));
+  const f = path.join(dir, "big.py");
+  const pad = "x".repeat(40 * 1024);
+  writeFileSync(f, `def foo():\n    return 1  # ${pad}\n`, "utf8");
+  const r = await runTool(PYTHON, "safe_edit", {
+    filepath: f,
+    old: `return 1  # ${pad}`,
+    new: `return 2  # ${pad}`,
+  });
+  assert.strictEqual(r.ok, true);
+  assert.ok(readFileSync(f, "utf8").includes("return 2"), true);
+  rmSync(dir, { recursive: true, force: true });
 });
 
 console.log(`\n${passed} passed, ${failed} failed`);
